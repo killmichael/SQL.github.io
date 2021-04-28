@@ -62,3 +62,43 @@ where date between '2019-01-01' and '2019-12-31'
 group by type,diff
 order by start_date;
 ```
+
+# 2 应该被禁止的Leetflex账户
+编写一个SQL查询语句，查找那些应该被禁止的Leetflex帐户编号account_id。 如果某个帐户在某一时刻从两个不同的网络地址登录了，则这个帐户应该被禁止。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/leetflex-banned-accounts
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+LogInfo table:
+
+| account_id | ip_address | login               | logout              |
+|-|-|-|-|
+| 1          | 1          | 2021-02-01 09:00:00 | 2021-02-01 09:30:00 |
+| 1          | 2          | 2021-02-01 08:00:00 | 2021-02-01 11:30:00 |
+| 2          | 6          | 2021-02-01 20:30:00 | 2021-02-01 22:00:00 |
+| 2          | 7          | 2021-02-02 20:30:00 | 2021-02-02 22:00:00 |
+| 3          | 9          | 2021-02-01 16:00:00 | 2021-02-01 16:59:59 |
+| 3          | 13         | 2021-02-01 17:00:00 | 2021-02-01 17:59:59 |
+| 4          | 10         | 2021-02-01 16:00:00 | 2021-02-01 17:00:00 |
+| 4          | 11         | 2021-02-01 17:00:00 | 2021-02-01 17:59:59 |
+
+Result table:
+
+| account_id |
+|-|
+| 1          |
+| 4          |
+
+```{SQL}
+SELECT
+    DISTINCT L1.account_id
+FROM
+    LogInfo L1 JOIN LogInfo L2 ON L1.account_id = L2.account_id
+WHERE
+    L1.ip_address <> L2.ip_address 
+    AND 
+    L1.login BETWEEN L2.login AND L2.logout;
+```
+
+
