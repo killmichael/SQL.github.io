@@ -101,4 +101,57 @@ WHERE
     L1.login BETWEEN L2.login AND L2.logout;
 ```
 
+# 3 正则表达式REGEXP
+http://blog.itpub.net/352988/viewspace-702052/
 
+找出符合的手机号码：
+
+```{SQL}
+SELECT
+    *
+FROM
+    table
+WHERE
+    REGEXP_LIKE(phone_num, '^[1]{1}[35678]{1}[[:digit:]]{9}$');
+```
+
+^  ---  开始
+
+[1]{1}  ---  数字1出现一次
+
+[35678]{1}  ---  数字3或5或6或7或8出现一次
+
+[[:digit:]]{9}  ---  9位数字
+
+$  ---  结束
+
+# 4 次日留存率计算
+```{SQL}
+select 
+    k1.dt,
+    count(distinct k1.tuid) dau,
+    count(distinct case when date_diff('day',cast(k1.dt as date),cast(k2.dt as date))=1 then k2.tuid end)/count(distinct k1.tuid) day_rate_2 
+from 
+(--统计日期当天的用户id
+    select 
+        distinct dt, tuid
+    from 
+        dwd_dau_custom_di
+    where 
+        dt >= '2020-06-01'--想要计算的时间段选择，此处为6月1日至今
+) k1
+left join
+(--之后又来的用户id
+	select 
+        distinct dt, tuid
+	from 
+        dwd_dau_custom_di
+	where 
+        dt >= '2020-06-01' 
+)k2 
+on k1.dt<=k2.dt and k1.tuid = k2.tuid --匹配条件：前后id相同，dt晚于统计日dt
+group by 
+    k1.dt
+order by 
+    k1.dt desc;
+```
